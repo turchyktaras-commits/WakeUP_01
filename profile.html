@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Профіль — WakeUp</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .profile-top {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .avatar {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 700;
+      color: #fff; flex-shrink: 0;
+    }
+    .profile-name { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
+    .profile-email { color: var(--text2); font-size: 0.9rem; margin-top: 4px; }
+    .profile-joined { color: var(--text3); font-size: 0.8rem; margin-top: 2px; }
+ 
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 2rem;
+      font-weight: 700;
+      font-family: 'Space Mono', monospace;
+      color: var(--accent2);
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text3);
+      margin-top: 4px;
+    }
+ 
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.8rem;
+      margin-bottom: 0.75rem;
+    }
+ 
+    .edit-btn-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+ 
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
+    }
+ 
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+      .stat-num { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+ 
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">⏰</div>
+      WakeUp
+    </a>
+    <nav>
+      <a href="index.html">Будильники</a>
+      <a href="profile.html" class="active">Профіль</a>
+      <a href="about.html">Про додаток</a>
+      <a href="login.html" class="btn btn-secondary btn-sm" style="margin-left: 4px;">Вийти</a>
+    </nav>
+    <button class="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+ 
+<div class="mobile-nav" id="mobileNav">
+  <a href="index.html">Будильники</a>
+  <a href="profile.html" class="active">Профіль</a>
+  <a href="about.html">Про додаток</a>
+  <a href="login.html">Вийти</a>
+</div>
+ 
+<main>
+  <div class="page-header">
+    <h1>Мій профіль</h1>
+    <p>Ваші персональні дані та налаштування акаунту</p>
+  </div>
+ 
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="profile-top">
+      <div class="avatar">І</div>
+      <div>
+        <div class="profile-name">Тарас Турчик</div>
+        <div class="profile-email">taras@example.com</div>
+        <div class="profile-joined">Зареєстровано: 20 квітня 2026</div>
+      </div>
+      <div style="margin-left: auto;">
+        <div class="status-row">
+          <span class="status-dot"></span>
+          <span class="badge badge-active">Активний</span>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num">7</div>
+        <div class="stat-label">Будильників</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">42</div>
+        <div class="stat-label">Спрацювань</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">3</div>
+        <div class="stat-label">Тижні поспіль</div>
+      </div>
+    </div>
+  </div>
+ 
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <p class="section-title">Особисті дані</p>
+    <table class="profile-table">
+      <tr>
+        <td>Повне ім'я</td>
+        <td>Тарас Турчик</td>
+      </tr>
+      <tr>
+        <td>Електронна пошта</td>
+        <td>taras@example.com</td>
+      </tr>
+      <tr>
+        <td>Стать</td>
+        <td>Чоловік</td>
+      </tr>
+      <tr>
+        <td>Дата народження</td>
+        <td>8 червня 2006</td>
+      </tr>
+      <tr>
+        <td>Вік</td>
+        <td>19 років</td>
+      </tr>
+      <tr>
+        <td>Дата реєстрації</td>
+        <td>20 квітня 2026</td>
+      </tr>
+    </table>
+  </div>
+ 
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <p class="section-title">Налаштування акаунту</p>
+    <table class="profile-table">
+      <tr>
+        <td>Мова інтерфейсу</td>
+        <td>Українська</td>
+      </tr>
+      <tr>
+        <td>Часовий пояс</td>
+        <td>Europe/Kyiv (UTC+3)</td>
+      </tr>
+      <tr>
+        <td>Формат часу</td>
+        <td>24-годинний</td>
+      </tr>
+      <tr>
+        <td>Сповіщення</td>
+        <td><span class="badge badge-active">Увімкнено</span></td>
+      </tr>
+      <tr>
+        <td>Email-сповіщення</td>
+        <td><span class="badge badge-inactive">Вимкнено</span></td>
+      </tr>
+      <tr>
+        <td>Тема оформлення</td>
+        <td>Темна</td>
+      </tr>
+    </table>
+ 
+    <div class="edit-btn-row">
+      <button class="btn btn-secondary">Змінити пароль</button>
+      <button class="btn btn-primary">Редагувати профіль</button>
+    </div>
+  </div>
+ 
+  <div class="card" style="border-color: rgba(248,113,113,0.3);">
+    <p style="font-size: 0.9rem; color: var(--text2); margin-bottom: 1rem;">
+      Видалення акаунту є незворотнім. Всі ваші будильники та налаштування будуть втрачені.
+    </p>
+    <button class="btn btn-danger btn-sm">Видалити акаунт</button>
+  </div>
+</main>
+ 
+<footer>
+  <div class="footer-inner">
+    <span>Лабораторна робота №1 · Web-дизайн</span>
+  </div>
+</footer>
+ 
+<script>
+  function toggleMenu() {
+    document.getElementById('mobileNav').classList.toggle('open');
+  }
+</script>
+ 
+</body>
+</html>

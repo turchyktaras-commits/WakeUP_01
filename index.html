@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Будильники — WakeUp</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .clock-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .clock-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at top, rgba(108,99,255,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .clock-time {
+      font-family: 'Space Mono', monospace;
+      font-size: clamp(3rem, 10vw, 5.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .clock-date {
+      color: var(--text2);
+      font-size: 0.95rem;
+    }
+    .clock-seconds {
+      font-size: 0.5em;
+      color: var(--accent2);
+      vertical-align: super;
+      margin-left: 4px;
+      font-weight: 400;
+    }
+ 
+    .add-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .add-card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .add-form-row {
+      display: grid;
+      grid-template-columns: 1fr 2fr auto;
+      gap: 12px;
+      align-items: end;
+    }
+    .days-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .day-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      color: var(--text2);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .day-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .day-btn:hover:not(.active) { border-color: var(--accent); color: var(--text); }
+ 
+    .alarms-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .alarms-header h2 { font-size: 1rem; font-weight: 600; }
+    .alarm-count { font-size: 0.8rem; color: var(--text3); }
+ 
+    .alarm-list { display: flex; flex-direction: column; gap: 10px; }
+ 
+    .alarm-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: border-color 0.2s;
+    }
+    .alarm-item:hover { border-color: rgba(108,99,255,0.4); }
+    .alarm-item.inactive { opacity: 0.5; }
+    .alarm-item.active-ring {
+      border-color: var(--warning);
+      background: rgba(251,191,36,0.05);
+      animation: ring-pulse 1s infinite;
+    }
+    @keyframes ring-pulse {
+      0%, 100% { border-color: var(--warning); }
+      50% { border-color: rgba(251,191,36,0.3); }
+    }
+ 
+    .alarm-time-big {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      min-width: 80px;
+      letter-spacing: -0.02em;
+    }
+ 
+    .alarm-details { flex: 1; }
+    .alarm-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 3px; }
+    .alarm-days { font-size: 0.8rem; color: var(--text3); }
+ 
+    .alarm-toggle {
+      width: 44px; height: 24px;
+      border-radius: 12px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .alarm-toggle.on { background: var(--accent); border-color: var(--accent); }
+    .alarm-toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform 0.2s;
+    }
+    .alarm-toggle.on::after { transform: translateX(20px); }
+ 
+    .alarm-del {
+      background: none;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+      border-radius: 6px;
+      transition: color 0.2s;
+      flex-shrink: 0;
+    }
+    .alarm-del:hover { color: var(--danger); background: rgba(248,113,113,0.1); }
+ 
+    .ring-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .ring-overlay.show { display: flex; }
+    .ring-modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      text-align: center;
+      max-width: 360px;
+      width: 90%;
+      animation: pop-in 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes pop-in {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .ring-icon { font-size: 3.5rem; animation: shake 0.5s infinite; margin-bottom: 1rem; }
+    @keyframes shake {
+      0%,100% { transform: rotate(0); }
+      25% { transform: rotate(-15deg); }
+      75% { transform: rotate(15deg); }
+    }
+    .ring-time { font-family: 'Space Mono', monospace; font-size: 3rem; font-weight: 700; color: var(--warning); margin-bottom: 0.5rem; }
+    .ring-name { color: var(--text2); margin-bottom: 1.75rem; font-size: 1rem; }
+ 
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text3);
+    }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+    .empty-text { font-size: 0.95rem; }
+ 
+    @media (max-width: 640px) {
+      .add-form-row { grid-template-columns: 1fr 1fr; }
+      .add-form-row .btn { grid-column: 1 / -1; }
+    }
+    @media (max-width: 480px) {
+      .add-form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+ 
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">⏰</div>
+      WakeUp
+    </a>
+    <nav>
+      <a href="index.html" class="active">Будильники</a>
+      <a href="profile.html">Профіль</a>
+      <a href="about.html">Про додаток</a>
+      <a href="login.html" class="btn btn-secondary btn-sm" style="margin-left: 4px;">Вийти</a>
+    </nav>
+    <button class="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+ 
+<div class="mobile-nav" id="mobileNav">
+  <a href="index.html" class="active">Будильники</a>
+  <a href="profile.html">Профіль</a>
+  <a href="about.html">Про додаток</a>
+  <a href="login.html">Вийти</a>
+</div>
+ 
+<main>
+ 
+
+  <div class="clock-card">
+    <div class="clock-time">
+      <span id="clockHM">00:00</span><span class="clock-seconds" id="clockS">00</span>
+    </div>
+    <div class="clock-date" id="clockDate">Завантаження...</div>
+  </div>
+ 
+  <div class="add-card">
+    <h2>➕ Новий будильник</h2>
+    <div class="add-form-row">
+      <div class="form-group" style="margin:0;">
+        <label for="alarmTime">Час</label>
+        <input type="time" id="alarmTime" value="07:00">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label for="alarmName">Назва (необов'язково)</label>
+        <input type="text" id="alarmName" placeholder="Прокидання, Робота...">
+      </div>
+      <button class="btn btn-primary" onclick="addAlarm()">Додати</button>
+    </div>
+    <div>
+      <label style="display:block; margin-top:1rem; margin-bottom:6px; font-size:0.85rem; color:var(--text2);">Повторення</label>
+      <div class="days-row" id="daysRow">
+        <button class="day-btn active" data-d="1">Пн</button>
+        <button class="day-btn active" data-d="2">Вт</button>
+        <button class="day-btn active" data-d="3">Ср</button>
+        <button class="day-btn active" data-d="4">Чт</button>
+        <button class="day-btn active" data-d="5">Пт</button>
+        <button class="day-btn" data-d="6">Сб</button>
+        <button class="day-btn" data-d="0">Нд</button>
+      </div>
+    </div>
+  </div>
+ 
+
+  <div class="alarms-header">
+    <h2>Мої будильники</h2>
+    <span class="alarm-count" id="alarmCount">0 будильників</span>
+  </div>
+ 
+  <div class="alarm-list" id="alarmList">
+  </div>
+ 
+</main>
+ 
+<footer>
+  <div class="footer-inner">
+    <span>Лабораторна робота №1 · Web-дизайн</span>
+  </div>
+</footer>
+ 
+<div class="ring-overlay" id="ringOverlay">
+  <div class="ring-modal">
+    <div class="ring-icon">🔔</div>
+    <div class="ring-time" id="ringTime">07:00</div>
+    <div class="ring-name" id="ringName">Прокидання</div>
+    <button class="btn btn-primary btn-full" onclick="dismissAlarm()" style="margin-bottom: 10px;">
+      Вимкнути
+    </button>
+    <button class="btn btn-secondary btn-full" onclick="snoozeAlarm()">
+      Відкласти на 5 хв
+    </button>
+  </div>
+</div>
+ 
+<script>
+  const DAY_NAMES = ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
+  const MONTHS = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+  const WEEK_DAYS_FULL = ['Неділя','Понеділок','Вівторок','Середа','Четвер','П\'ятниця','Субота'];
+ 
+  let alarms = [
+    { id: 1, time: '06:30', name: 'Ранкова зарядка', days: [1,2,3,4,5], on: true },
+    { id: 2, time: '08:00', name: 'Робота', days: [1,2,3,4,5], on: true },
+    { id: 3, time: '12:00', name: 'Обід', days: [1,2,3,4,5,6,0], on: false },
+    { id: 4, time: '22:30', name: 'Сон', days: [1,2,3,4,5], on: true },
+  ];
+  let nextId = 10;
+  let ringingId = null;
+  let snoozeTime = null;
+ 
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('clockHM').textContent = h + ':' + m;
+    document.getElementById('clockS').textContent = s;
+    const d = now.getDate();
+    const mo = MONTHS[now.getMonth()];
+    const wd = WEEK_DAYS_FULL[now.getDay()];
+    document.getElementById('clockDate').textContent = wd + ', ' + d + ' ' + mo + ' ' + now.getFullYear();
+ 
+    const hhmm = h + ':' + m;
+    if (s === '00') {
+      alarms.forEach(a => {
+        if (!a.on) return;
+        if (a.time === hhmm && a.days.includes(now.getDay())) {
+          triggerAlarm(a);
+        }
+      });
+      if (snoozeTime && snoozeTime === hhmm) {
+        const a = alarms.find(x => x.id === ringingId);
+        if (a) triggerAlarm(a);
+        snoozeTime = null;
+      }
+    }
+  }
+ 
+  function triggerAlarm(a) {
+    ringingId = a.id;
+    document.getElementById('ringTime').textContent = a.time;
+    document.getElementById('ringName').textContent = a.name || 'Будильник';
+    document.getElementById('ringOverlay').classList.add('show');
+
+    if (Notification.permission === 'granted') {
+      new Notification('⏰ WakeUp: ' + (a.name || 'Будильник'), { body: 'Час: ' + a.time });
+    }
+  }
+ 
+  function dismissAlarm() {
+    document.getElementById('ringOverlay').classList.remove('show');
+    ringingId = null;
+  }
+ 
+  function snoozeAlarm() {
+    document.getElementById('ringOverlay').classList.remove('show');
+    const now = new Date(Date.now() + 5 * 60 * 1000);
+    snoozeTime = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  }
+ 
+  document.querySelectorAll('.day-btn').forEach(btn => {
+    btn.addEventListener('click', () => btn.classList.toggle('active'));
+  });
+ 
+  function getSelectedDays() {
+    return [...document.querySelectorAll('.day-btn.active')].map(b => parseInt(b.dataset.d));
+  }
+ 
+  function daysLabel(days) {
+    if (!days.length) return 'Одноразово';
+    if (days.length === 7) return 'Щодня';
+    if (JSON.stringify([...days].sort()) === JSON.stringify([1,2,3,4,5])) return 'Будні';
+    if (JSON.stringify([...days].sort()) === JSON.stringify([0,6])) return 'Вихідні';
+    return [...days].map(d => DAY_NAMES[d]).join(', ');
+  }
+ 
+  function addAlarm() {
+    const time = document.getElementById('alarmTime').value;
+    const name = document.getElementById('alarmName').value.trim() || 'Будильник';
+    const days = getSelectedDays();
+    if (!time) return;
+    alarms.push({ id: nextId++, time, name, days, on: true });
+    alarms.sort((a,b) => a.time.localeCompare(b.time));
+    document.getElementById('alarmName').value = '';
+    renderAlarms();
+    if (Notification.permission === 'default') Notification.requestPermission();
+  }
+ 
+  function toggleAlarm(id) {
+    const a = alarms.find(x => x.id === id);
+    if (a) { a.on = !a.on; renderAlarms(); }
+  }
+ 
+  function deleteAlarm(id) {
+    alarms = alarms.filter(x => x.id !== id);
+    renderAlarms();
+  }
+ 
+  function renderAlarms() {
+    const list = document.getElementById('alarmList');
+    const count = document.getElementById('alarmCount');
+    count.textContent = alarms.length + ' ' + (alarms.length === 1 ? 'будильник' : alarms.length < 5 ? 'будильники' : 'будильників');
+ 
+    if (!alarms.length) {
+      list.innerHTML = '<div class="empty-state"><div class="empty-icon">⏰</div><div class="empty-text">Будильників ще немає<br>Додайте перший вище</div></div>';
+      return;
+    }
+    list.innerHTML = alarms.map(a => `
+      <div class="alarm-item ${a.on ? '' : 'inactive'}" id="alarm-${a.id}">
+        <div class="alarm-time-big">${a.time}</div>
+        <div class="alarm-details">
+          <div class="alarm-name">${a.name}</div>
+          <div class="alarm-days">${daysLabel(a.days)}</div>
+        </div>
+        <div class="alarm-toggle ${a.on ? 'on' : ''}" onclick="toggleAlarm(${a.id})" title="${a.on ? 'Вимкнути' : 'Увімкнути'}"></div>
+        <button class="alarm-del" onclick="deleteAlarm(${a.id})" title="Видалити">✕</button>
+      </div>
+    `).join('');
+  }
+ 
+  function toggleMenu() {
+    document.getElementById('mobileNav').classList.toggle('open');
+  }
+ 
+  renderAlarms();
+  updateClock();
+  setInterval(updateClock, 1000);
+</script>
+ 
+</body>
+</html>
